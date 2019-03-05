@@ -5,9 +5,11 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/micro/go-micro/metadata"
+
+	. "github.com/go-infra/auth"
 )
 
-type User string
+
 
 const (
 	RequestID = "RequestID"
