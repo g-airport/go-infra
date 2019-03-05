@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go_infrastructure/env"
+	"github.com/go-infra/env"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
