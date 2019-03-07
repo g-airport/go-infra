@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/go-infra/log"
+	iLog "github.com/go-infra/log"
 )
 
 func Retry(attempts int, sleep time.Duration, f func() error,
@@ -21,7 +21,7 @@ func Retry(attempts int, sleep time.Duration, f func() error,
 	// Output warn logs
 	output := logFunc(err)
 	if output != "" {
-		log.Warnw("retry", output)
+		iLog.Warnw("retry", output)
 	}
 
 	// Add some randomness to prevent creating a Thundering Herd

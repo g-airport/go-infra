@@ -3,13 +3,11 @@ package context
 import (
 	"context"
 
+	. "github.com/go-infra/auth"
+
 	"github.com/google/uuid"
 	"github.com/micro/go-micro/metadata"
-
-	. "github.com/go-infra/auth"
 )
-
-
 
 const (
 	RequestID = "RequestID"

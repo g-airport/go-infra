@@ -2,15 +2,14 @@ package main
 
 import (
 	"bufio"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
-
-	"crypto/tls"
-	"crypto/x509"
 
 	"github.com/Shopify/sarama"
 )

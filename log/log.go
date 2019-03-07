@@ -4,7 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-infra/env"
+	iEnv "github.com/go-infra/env"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -41,7 +42,7 @@ func NewLogger(path string, level string) (*Logger, error) {
 	out.path = path
 	out.lastRotateTime = time.Now()
 	out.level = LEVELS[level]
-	out.pid = []interface{}{env.Pid}
+	out.pid = []interface{}{iEnv.Pid}
 
 	// config lumberjack
 	out.rLog.Filename = path
@@ -65,7 +66,7 @@ func NewLogger(path string, level string) (*Logger, error) {
 		zap.AddCaller(),
 		zap.AddCallerSkip(2),
 	).
-		With(zap.Int("pid", env.Pid))
+		With(zap.Int("pid", iEnv.Pid))
 
 	// default enable daily rotate
 	out.rolling = true

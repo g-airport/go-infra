@@ -7,9 +7,10 @@ import (
 	"strings"
 	"time"
 
-	gctx "github.com/go-infra/context"
-	"github.com/go-infra/env"
-	"github.com/go-infra/log"
+	gCtx "github.com/go-infra/context"
+	iEnv "github.com/go-infra/env"
+	iErr "github.com/go-infra/errors"
+	iLog "github.com/go-infra/log"
 
 	"github.com/micro/go-micro/metadata"
 	"github.com/micro/go-micro/server"
@@ -17,13 +18,13 @@ import (
 )
 
 var (
-	accessLog *log.Logger
+	accessLog *iLog.Logger
 )
 
 func init() {
 	path, _ := filepath.Abs(fmt.Sprintf("%s%saccess.log",
-		env.LogDir, string(filepath.Separator)))
-	accessLog, _ = log.NewLogger(path, "info")
+		iEnv.LogDir, string(filepath.Separator)))
+	accessLog, _ = iLog.NewLogger(path, "info")
 }
 
 type User struct {
@@ -103,7 +104,7 @@ func ServerAuthWrapper(rights map[string]Auth) server.HandlerWrapper {
 				return err
 			}
 
-			ctx = gctx.SetUser(ctx, *u)
+			ctx = gCtx.SetUser(ctx, *u)
 
 			//todo
 			addrText := ""
@@ -113,7 +114,7 @@ func ServerAuthWrapper(rights map[string]Auth) server.HandlerWrapper {
 			end := time.Now()
 
 			code := 200
-			if er := ParseFromError(err); er != nil {
+			if er := iErr.ParseRPCError(err); er != nil {
 				code = er.Code
 			}
 
