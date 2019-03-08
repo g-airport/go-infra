@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	_ "github.com/go-infra/validate"
+	_ "github.com/onlyLeoll/go-infra/validate"
 )
 
 var (

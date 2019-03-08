@@ -3,7 +3,7 @@
 #### Usage
 
 ```go
-import  _ "github.com/go-infra/proxy"
+import  _ "github.com/onlyLeoll/go-infra/proxy"
 ```
 
 ```bash

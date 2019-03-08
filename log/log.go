@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	iEnv "github.com/go-infra/env"
+	iEnv "github.com/onlyLeoll/go-infra/env"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"

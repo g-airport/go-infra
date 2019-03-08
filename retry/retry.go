@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	iLog "github.com/go-infra/log"
+	iLog "github.com/onlyLeoll/go-infra/log"
 )
 
 func Retry(attempts int, sleep time.Duration, f func() error,

@@ -1,7 +1,7 @@
 package auth
 
 import (
-	iErr "github.com/go-infra/errors"
+	iErr "github.com/onlyLeoll/go-infra/errors"
 )
 
 var (

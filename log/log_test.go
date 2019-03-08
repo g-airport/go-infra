@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/go-infra/env"
+	"github.com/onlyLeoll/go-infra/env"
 )
 
 var Access *Logger
