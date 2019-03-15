@@ -6,10 +6,10 @@ import (
 	_ "net/http/pprof"
 	"runtime"
 
-	iCfg "github.com/onlyLeoll/go-infra/config"
-	iEnv "github.com/onlyLeoll/go-infra/env"
-	iLog "github.com/onlyLeoll/go-infra/log"
-	iSync "github.com/onlyLeoll/go-infra/sync"
+	iCfg "github.com/g-airport/go-infra/config"
+	iEnv "github.com/g-airport/go-infra/env"
+	iLog "github.com/g-airport/go-infra/log"
+	iSync "github.com/g-airport/go-infra/sync"
 
 	"github.com/google/gops/agent"
 	"github.com/micro/go-config"

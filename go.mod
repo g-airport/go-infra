@@ -1,4 +1,4 @@
-module github.com/onlyLeoll/go-infra
+module github.com/g-airport/go-infra
 
 go 1.12
 
@@ -34,4 +34,5 @@ require (
 	go.uber.org/zap v1.9.1
 	golang.org/x/net v0.0.0-20190301231341-16b79f2e4e95
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
+	sigs.k8s.io/structured-merge-diff v0.0.0-20190302045857-e85c7b244fd2 // indirect
 )

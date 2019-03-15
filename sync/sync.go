@@ -7,7 +7,7 @@ import (
 	"github.com/micro/go-sync/lock"
 	mConsul "github.com/micro/go-sync/lock/consul"
 
-	"github.com/onlyLeoll/go-infra/log"
+	"github.com/g-airport/go-infra/log"
 )
 
 var global lock.Lock

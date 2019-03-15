@@ -30,8 +30,8 @@ consul (service discover) , mq , gRpc ...
 
 ```golang
 import (
-    "github.com/onlyLeoll/go-infra/log"
-    "github.com/onlyLeoll/go-infra/env"
+    "github.com/g-airport/go-infra/log"
+    "github.com/g-airport/go-infra/env"
 )
     
 func init() {

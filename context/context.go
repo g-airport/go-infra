@@ -3,7 +3,7 @@ package context
 import (
 	"context"
 
-	. "github.com/onlyLeoll/go-infra/auth"
+	. "github.com/g-airport/go-infra/auth"
 
 	"github.com/google/uuid"
 	"github.com/micro/go-micro/metadata"

@@ -8,5 +8,5 @@ GOGET = ${GO} get
 BUILD = ${CROSS} ${GO} build ${GOFLAGS}
 BRANCH = ${shell basenae `git symbolic-ref HEAD`}
 COMMIT = ${shell git rev-parse HEAD}
-VERSION_NAMESPACE = github.com/onlyLeoll/go-infra/envinit
+VERSION_NAMESPACE = github.com/g-airport/go-infra/envinit
 BUILD_VERSION = ${BUILD} -ldflags "-X $(VERSION_NAMESPACE).repository=$(REPO) -X $(VERSION_NAMESPACE).branch=$(BRANCH) -X $(VERSION_NAMESPACE).commit=$(COMMIT)"
