@@ -22,6 +22,22 @@ var FuncRights = map[string]auth.Auth {
 	micro.WrapHandler(auth.ServerAuthWrapper(FuncRights)),
 	)
 ```
+- [Run Micro Service]
+
+```go
+//Prepare Interface
+type ImplSrv struct {
+}
+
+func NewServer() *ImplSrv {
+	return &ImplSrv{}
+}
+
+//Run go-micro
+ns := NewServer()
+server := service.Server()
+server.Handle(server.NewHandler(ns))
+```
 
 
 ## env 
