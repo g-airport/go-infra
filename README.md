@@ -2,6 +2,28 @@
 
 **用途:工具包，基于 golang 实现**
 
+## auth 
+
+- 基于 golang micro service 服务鉴权
+
+```go
+package main
+import (
+	"github.com/g-airport/go-infra/auth"
+	"github.com/micro/go-micro"
+)
+var FuncRights = map[string]auth.Auth {
+	// 控制日志是否输出
+	"ImplSrvName.FuncName":{1,true,true},
+}
+    servive := micro.NewService()
+    service.Init(
+	// ...
+	micro.WrapHandler(auth.ServerAuthWrapper(FuncRights)),
+	)
+```
+
+
 ## env 
 
 - 目录配置
@@ -68,4 +90,37 @@ type Error struct {
 	Content  interface{} `json:"content,omitempty"`
 }
 ```
+
+## sync 
+
+- [GlobalTimer]
+
+- [Once]
+
+## buffer
+
+```go
+import (
+	"github.com/g-airport/go-infra/buffer"
+
+)
+
+    c := NewChan()
+    c.Put(1)
+    c.Get()
+```
+
+## Tool
+
+| Usage 💡 | Link 🔑
+| --- | --- |
+|Golang embed Proxy   |[Golang embed Proxy](https://github.com/g-airport/go-infra/blob/master/proxy/readme.md) |
+|Kafka Command     |[Kafka Command](https://github.com/g-airport/go-infra/blob/master/mq/readme.md) |
+|Retry Func     |[Retry Func](https://github.com/g-airport/go-infra/blob/master/retry/retry.go) |
+|Float Math     |[Float Math](https://github.com/g-airport/go-infra/blob/master/math/math.go) |
+|Match Func     |[Match Func](https://github.com/g-airport/go-infra/blob/master/match/match.go) |
+|User Context     |[User Context](https://github.com/g-airport/go-infra/blob/master/context/context.go) |
+|AES crypt     |[AES crypt](https://github.com/g-airport/go-infra/blob/master/crypt/aes.go) |
+
+
 
