@@ -51,7 +51,7 @@ func (o DBBuilder) BuildXORM() (*xorm.Engine, error) {
 
 // recommended
 func (o DBBuilder) BuildGORM() (*gorm.DB, error) {
-	db, err := gorm.Open(o.Url)
+	db, err := gorm.Open(o.Driver, o.Url)
 	if err != nil {
 		return nil, err
 	}
