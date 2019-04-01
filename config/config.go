@@ -39,8 +39,8 @@ func RegisterTTL() (time.Duration, time.Duration) {
 }
 
 // key : value
-func Get(key string) string {
-	return Cfg.Get(key).String(key)
+func Get(key string) reader.Value {
+	return Cfg.Get(key)
 }
 
 //Watch is wrapper of go-config's watch
