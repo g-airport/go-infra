@@ -60,7 +60,7 @@ var (
 ## config 
 
 - init some infrastructure eg: some middleware like 
-consul (service discover) , mq , gRpc ...
+consul (service discover) , mq , gRPC ...
 
 ## log
 
