@@ -1,6 +1,6 @@
 module github.com/g-airport/go-infra
 
-go 1.12
+go 1.17
 
 require (
 	github.com/Shopify/sarama v1.21.0
