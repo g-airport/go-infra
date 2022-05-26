@@ -1,186 +1,168 @@
 package log
 
 import (
+	"fmt"
 	"sync"
 	"time"
-
-	iEnv "github.com/g-airport/go-infra/env"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-//-------------------------------------------------*
-// 基于 zap 的 log level
-//-------------------------------------------------*
-var LEVELS = map[string]zapcore.Level{
-	"debug": zap.DebugLevel,
-	"info":  zap.InfoLevel,
-	"warn":  zap.WarnLevel,
-	"err":   zap.ErrorLevel,
-}
-
 type Logger struct {
-	path  string
-	rLog  *lumberjack.Logger
 	log   *zap.Logger
+	rLog  *lumberjack.Logger
 	sugar *zap.SugaredLogger
-
 	level zapcore.Level
-	pid   []interface{}
 
-	rolling        bool
-	lastRotateTime time.Time
-	lastRotateRW   sync.Mutex
+	rolling    bool
+	path       string
+	lastRotate time.Time
+
+	rotateMu *sync.Mutex
 }
 
-func NewLogger(path string, level string) (*Logger, error) {
+func Init(path string, level zapcore.Level) error {
+	l, err := NewLogger(path, level)
+	if err != nil {
+		return err
+	}
+
+	SetDefault(l)
+	return nil
+}
+
+func Sync() {
+	_ = _logger.log.Sync()
+}
+
+func NewLogger(path string, level zapcore.Level) (*Logger, error) {
+	return NewLoggerWithEncoderConfig(path, level, nil)
+}
+
+func NewLoggerWithEncoderConfig(path string, level zapcore.Level, config *zapcore.EncoderConfig) (*Logger, error) {
 	out := new(Logger)
 	out.rLog = new(lumberjack.Logger)
 
 	out.path = path
-	out.lastRotateTime = time.Now()
-	out.level = LEVELS[level]
-	out.pid = []interface{}{iEnv.Pid}
+	out.lastRotate = time.Now()
+	out.level = level
+	out.rotateMu = &sync.Mutex{}
 
 	// config lumberjack
 	out.rLog.Filename = path
-	// automatic rolling file on it increment than 2GB
-	out.rLog.MaxSize = 0x1000 * 5
+	out.rLog.MaxSize = 0x1000 * 2 // automatic rolling file on it increment than 2GB
 	out.rLog.LocalTime = true
 	out.rLog.Compress = true
-	// reserve last 60 day logs
-	out.rLog.MaxBackups = 60
+	out.rLog.MaxBackups = 60 // reserve last 60 day logs
+	out.rolling = true
 
-	// config encoder config
-	ec := zap.NewProductionEncoderConfig()
-	ec.EncodeLevel = zapcore.CapitalLevelEncoder
-	ec.EncodeTime = zapcore.ISO8601TimeEncoder
+	// config encoder
+	var cfg zapcore.EncoderConfig
+	if config == nil {
+		// default config
+		cfg = zap.NewProductionEncoderConfig()
+		cfg.EncodeLevel = zapcore.CapitalLevelEncoder
+		cfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	} else {
+		cfg = *config
+	}
 
 	// config core
 	c := zapcore.AddSync(out.rLog)
-	core := zapcore.NewCore(zapcore.NewJSONEncoder(ec), c, out.level)
+	core := zapcore.NewCore(zapcore.NewJSONEncoder(cfg), c, out.level)
 	out.log = zap.New(
 		core,
 		zap.AddCaller(),
 		zap.AddCallerSkip(2),
-	).
-		With(zap.Int("pid", iEnv.Pid))
-
-	// default enable daily rotate
-	out.rolling = true
+	)
 
 	out.sugar = out.log.Sugar()
 	return out, nil
 }
 
-func (tLog *Logger) checkRotate() {
-	if !tLog.rolling {
+func (log *Logger) checkRotate() {
+	if !log.rolling {
 		return
 	}
 
 	n := time.Now()
+	if log.differentDay(n) {
+		log.rotateMu.Lock()
+		defer log.rotateMu.Unlock()
 
-	tLog.lastRotateRW.Lock()
-	defer tLog.lastRotateRW.Unlock()
-
-	last := tLog.lastRotateTime
-	y, m, d := last.Year(), last.Month(), last.Day()
-	if y != n.Year() || m != n.Month() || d != n.Day() {
-		go tLog.rLog.Rotate()
-		tLog.lastRotateTime = n
+		if log.differentDay(n) {
+			_ = log.rLog.Rotate()
+			log.lastRotate = n
+		}
 	}
 }
 
-func (tLog *Logger) EnableDailyFile() {
-	tLog.rolling = true
+func (log *Logger) differentDay(t time.Time) bool {
+	y, m, d := log.lastRotate.Year(), log.lastRotate.Month(), log.lastRotate.Day()
+	return y != t.Year() || m != t.Month() || d != t.Day()
 }
 
-func (tLog *Logger) Debug(format string, v ...interface{}) {
-	tLog.checkRotate()
-	if !tLog.level.Enabled(zap.DebugLevel) {
-		return
-	}
-
-	defer tLog.log.Sync()
-	tLog.sugar.Debugf(format, v...)
+func (log *Logger) EnableDailyFile() {
+	log.rolling = true
 }
 
-func (tLog *Logger) Info(format string, v ...interface{}) {
-	tLog.checkRotate()
-	if !tLog.level.Enabled(zap.InfoLevel) {
-		return
-	}
-
-	defer tLog.log.Sync()
-	tLog.sugar.Infof(format, v...)
+func (log *Logger) Err(format string, v ...interface{}) {
+	log.checkRotate()
+	log.sugar.Errorf(format, v...)
 }
 
-func (tLog *Logger) Warn(format string, v ...interface{}) {
-	tLog.checkRotate()
-	if !tLog.level.Enabled(zap.WarnLevel) {
-		return
-	}
-
-	defer tLog.log.Sync()
-	tLog.sugar.Warnf(format, v...)
+func (log *Logger) Errw(format string, v ...interface{}) {
+	log.checkRotate()
+	log.sugar.Errorw(format, v...)
 }
 
-func (tLog *Logger) Err(format string, v ...interface{}) {
-	tLog.checkRotate()
-	if !tLog.level.Enabled(zap.ErrorLevel) {
-		return
-	}
-
-	defer tLog.log.Sync()
-	tLog.sugar.Errorf(format, v...)
+func (log *Logger) Warn(format string, v ...interface{}) {
+	log.checkRotate()
+	log.sugar.Warnf(format, v...)
 }
 
-//-------------------------------------------------*
-// json format
-//-------------------------------------------------*
-func (tLog *Logger) Debugw(format string, v ...interface{}) {
-	tLog.checkRotate()
-	if !tLog.level.Enabled(zap.DebugLevel) {
-		return
-	}
-
-	defer tLog.log.Sync()
-	tLog.sugar.Debugw(format, v...)
+func (log *Logger) Warnw(format string, v ...interface{}) {
+	log.checkRotate()
+	log.sugar.Warnw(format, v...)
 }
 
-func (tLog *Logger) Infow(format string, v ...interface{}) {
-	tLog.checkRotate()
-	if !tLog.level.Enabled(zap.InfoLevel) {
-		return
-	}
-
-	defer tLog.log.Sync()
-	tLog.sugar.Infow(format, v...)
+func (log *Logger) Info(format string, v ...interface{}) {
+	log.checkRotate()
+	log.sugar.Infof(format, v...)
 }
 
-func (tLog *Logger) Warnw(format string, v ...interface{}) {
-	tLog.checkRotate()
-	if !tLog.level.Enabled(zap.WarnLevel) {
-		return
-	}
-
-	defer tLog.log.Sync()
-	tLog.sugar.Warnw(format, v...)
+func (log *Logger) Infow(format string, v ...interface{}) {
+	log.checkRotate()
+	log.sugar.Infow(format, v...)
 }
 
-func (tLog *Logger) Errw(format string, v ...interface{}) {
-	tLog.checkRotate()
-	if !tLog.level.Enabled(zap.ErrorLevel) {
-		return
-	}
-
-	defer tLog.log.Sync()
-	tLog.sugar.Errorw(format, v...)
+func (log *Logger) Debug(format string, v ...interface{}) {
+	log.checkRotate()
+	log.sugar.Debugf(format, v...)
 }
 
-var _logger *Logger
+func (log *Logger) Debugw(format string, v ...interface{}) {
+	log.checkRotate()
+	log.sugar.Debugw(format, v...)
+}
+
+func (log *Logger) Print(v ...interface{}) {
+	log.checkRotate()
+	log.sugar.Info(v...)
+}
+
+func (log *Logger) Printf(format string, v ...interface{}) {
+	log.checkRotate()
+	log.sugar.Info(fmt.Sprintf(format, v...))
+}
+
+func (log *Logger) GetUnderlyingLogger() *zap.Logger {
+	return log.log
+}
+
+var _logger, _ = NewLogger("log/common.log", zap.InfoLevel)
 
 func GetDefault() *Logger {
 	return _logger
@@ -190,30 +172,14 @@ func SetDefault(l *Logger) {
 	_logger = l
 }
 
-func Stdout() {
-	l, _ := NewLogger("stdout", "debug")
-	SetDefault(l)
+func Stdout() *Logger {
+	l, _ := NewLogger("stdout", zap.InfoLevel)
+	return l
 }
 
-func Emergency(format string, v ...interface{}) {
+func Err(format string, v ...interface{}) error {
 	_logger.Err(format, v...)
-}
-
-func Alert(format string, v ...interface{}) {
-	_logger.Err(format, v...)
-}
-
-func Critical(format string, v ...interface{}) {
-	_logger.Err(format, v...)
-}
-
-func Notice(format string, v ...interface{}) {
-	_logger.Info(format, v...)
-}
-
-// base
-func Err(format string, v ...interface{}) {
-	_logger.Err(format, v...)
+	return fmt.Errorf(format, v...)
 }
 
 func Warn(format string, v ...interface{}) {
@@ -228,7 +194,6 @@ func Debug(format string, v ...interface{}) {
 	_logger.Debug(format, v...)
 }
 
-// json format
 func Errw(format string, v ...interface{}) {
 	_logger.Errw(format, v...)
 }

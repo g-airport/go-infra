@@ -38,7 +38,7 @@ func RegisterTTL() (time.Duration, time.Duration) {
 	return ttl, interval
 }
 
-// key : value
+//Get key : value
 func Get(key string) reader.Value {
 	return Cfg.Get(key)
 }
